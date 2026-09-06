@@ -1,0 +1,9 @@
+{
+  "name": "ff-lobby-generator",
+  "version": "1.0.0",
+  "description": "Free Fire Lobby Generator by Lutfizx",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.44"
+  },
+  "engines": { "node": ">=18" }
+}

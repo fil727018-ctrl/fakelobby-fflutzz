@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Lobby Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+        body{background:#000;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-x:hidden;overflow-y:auto}
+        .gradient-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+        .gradient-pink{position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(255,64,129,.4) 0%,rgba(255,64,129,0) 70%);filter:blur(60px);animation:floatPink 15s ease-in-out infinite}
+        .gradient-blue{position:absolute;bottom:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(33,150,243,.4) 0%,rgba(33,150,243,0) 70%);filter:blur(60px);animation:floatBlue 15s ease-in-out infinite}
+        @keyframes floatPink{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,30px) scale(1.1)}}
+        @keyframes floatBlue{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,-30px) scale(1.1)}}
+        .container-wrapper{display:flex;align-items:center;justify-content:center;width:100%;padding:20px;min-height:100vh}
+        .mobile-container{width:100%;max-width:420px;background:rgba(20,20,20,.9);border-radius:20px;padding:25px;box-shadow:0 10px 30px rgba(0,0,0,.8);border:1px solid #333;position:relative;z-index:1;backdrop-filter:blur(15px);margin:0 auto;opacity:0;transform:translateY(50px);animation:fadeInUp .8s ease forwards}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .mobile-header{margin-bottom:22px;position:relative;animation:slideIn .6s ease .2s forwards;opacity:0;transform:translateX(-20px)}
+        @keyframes slideIn{to{opacity:1;transform:translateX(0)}}
+        .studio-title{font-size:1.0rem;font-weight:800;color:#fff;letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+        .ff-logo{color:#EE1D52}
+        .build-version{font-size:0.78rem;font-weight:600;color:#aaa;margin-bottom:10px}
+        .divider-line{height:1px;background:#333;width:100%;margin:8px 0 10px}
+        .ready-badge{position:absolute;top:0;right:0;background:rgba(0,200,83,.1);color:#00c853;padding:7px 13px;border-radius:20px;font-weight:700;font-size:0.78rem;letter-spacing:1px;display:flex;align-items:center;gap:7px;border:1px solid #00c853;animation:fadeIn .8s ease .4s forwards;opacity:0}
+        @keyframes fadeIn{to{opacity:1}}
+        .ready-dot{width:7px;height:7px;background:#00c853;border-radius:50%;animation:pulse 2s infinite}
+        @keyframes pulse{0%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.2)}100%{opacity:1;transform:scale(1)}}
+        .input-section{margin-bottom:18px;animation:fadeIn .8s ease .3s forwards;opacity:0}
+        .input-group{margin-bottom:13px}
+        .input-label{font-size:0.8rem;font-weight:600;margin-bottom:5px;color:#fff;display:flex;align-items:center;gap:7px}
+        .input-label i{color:#aaa;font-size:0.78rem}
+        .message-input{width:100%;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid #333;border-radius:12px;color:#fff;-webkit-text-fill-color:#fff;font-size:0.93rem;transition:all .3s}
+        .message-input:focus{outline:none;border-color:#555;background:rgba(255,255,255,.08)}
+        .message-input::placeholder{color:#555;-webkit-text-fill-color:#555}
+        .message-input:-webkit-autofill,.message-input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #1a1a1a inset;-webkit-text-fill-color:#fff;caret-color:#fff}
+        select.message-input{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23aaa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+        select.message-input option{background:#1a1a1a;color:#fff}
+        .generate-btn{width:100%;padding:15px;background:#000;color:#fff;border:1px solid #333;border-radius:12px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;letter-spacing:1px;animation:fadeIn .8s ease .5s forwards;opacity:0}
+        .generate-btn:hover:not(:disabled){background:#111;transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,.5)}
+        .generate-btn:active:not(:disabled){transform:scale(.98)}
+        .generate-btn:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.3)}
+        .mobile-footer{display:flex;flex-direction:column;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid #333;animation:fadeIn .8s ease .6s forwards;opacity:0}
+        .whatsapp-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;background:rgba(25,211,102,.1);color:#fff;text-decoration:none;border-radius:12px;font-weight:600;font-size:0.92rem;transition:all .3s;letter-spacing:1px;border:1px solid rgba(25,211,102,.3)}
+        .whatsapp-btn:hover{background:rgba(25,211,102,.2)}
+        .whatsapp-btn i{color:#25d366}
+        .developer-credit{text-align:center;color:#aaa;font-size:0.82rem}
+        .dev-name{color:#fff;font-weight:600}
+        .result-section{display:none;margin-top:16px;text-align:center}
+        .result-section.active{display:block;animation:fadeIn .5s ease forwards}
+        .image-container{max-width:100%;margin:0 auto 14px;border-radius:12px;overflow:hidden;border:1px solid #333;box-shadow:0 5px 15px rgba(0,0,0,.5)}
+        #resultCanvas{width:100%;display:block}
+        .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .action-btn{padding:13px;border-radius:10px;font-size:0.92rem;font-weight:600;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #333;background:transparent;color:#fff}
+        .action-btn:active{transform:scale(.95)}
+        .download-btn{background:rgba(255,64,129,.1)}
+        .download-btn:hover{background:rgba(255,64,129,.2)}
+        .new-btn{background:rgba(33,150,243,.1)}
+        .new-btn:hover{background:rgba(33,150,243,.2)}
+        .error-message{background:rgba(220,53,69,.1);border:1px solid rgba(220,53,69,.3);color:#f8d7da;padding:10px;border-radius:10px;margin-bottom:12px;display:none;align-items:center;gap:9px;font-size:0.83rem}
+        .error-message.active{display:flex}
+        .loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .3s}
+        .loading-overlay.active{opacity:1;visibility:visible}
+        .spinner{width:52px;height:52px;border:4px solid transparent;border-top:4px solid #ff4081;border-right:4px solid #2196f3;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:14px}
+        @keyframes spin{100%{transform:rotate(360deg)}}
+        .loading-text{color:#fff;font-size:1rem;font-weight:600}
+        .loading-sub{color:#aaa;font-size:0.8rem;margin-top:6px}
+        .notification{position:fixed;top:22px;right:22px;background:rgba(20,20,20,.95);color:#fff;padding:13px 16px;border-radius:12px;display:flex;align-items:center;gap:10px;z-index:3000;transform:translateX(150%);transition:transform .5s;border:1px solid #333;max-width:270px;backdrop-filter:blur(15px)}
+        .notification.show{transform:translateX(0)}
+        .notification-icon{font-size:1.1rem;color:#00c853}
+        .notification-content h3{font-size:0.9rem;margin-bottom:2px}
+        .notification-content p{font-size:0.76rem;opacity:.8}
+        @media(max-width:480px){body{padding:10px}.mobile-container{padding:18px;border-radius:15px}.container-wrapper{padding:8px;min-height:100vh}.notification{top:12px;right:12px;left:12px;max-width:none}.action-buttons{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<div class="gradient-bg">
+    <div class="gradient-pink"></div>
+    <div class="gradient-blue"></div>
+</div>
+
+<div class="container-wrapper">
+    <div class="mobile-container">
+
+        <div class="mobile-header">
+            <div class="header-left">
+                <div class="studio-title">
+                    <i class="fas fa-fire ff-logo"></i>
+                    FF Lobby Generator
+                </div>
+                <div class="build-version">GENERATOR v1.0</div>
+                <div class="divider-line"></div>
+            </div>
+            <div class="ready-badge">
+                <div class="ready-dot"></div>
+                READY
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span id="errorText">Terjadi kesalahan.</span>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <div class="input-label"><i class="fas fa-user"></i> USERNAME</div>
+                <input type="text" id="username" class="message-input" placeholder="Contoh: Lutfizx" maxlength="20">
+            </div>
+            <div class="input-group">
+                <div class="input-label"><i class="fas fa-gamepad"></i> PILIH LOBBY</div>
+                <select id="lobbySelect" class="message-input">
+                    <option value="0">🎲 Random Lobby</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="generate-btn" id="generateBtn" disabled>
+            <i class="fas fa-bolt"></i> GENERATE SEKARANG
+        </button>
+
+        <div class="result-section" id="resultSection">
+            <div class="image-container">
+                <canvas id="resultCanvas"></canvas>
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn download-btn" id="downloadBtn">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="action-btn new-btn" id="newBtn">
+                    <i class="fas fa-redo"></i> Buat Baru
+                </button>
+            </div>
+        </div>
+
+        <div class="mobile-footer">
+            <a href="https://whatsapp.com/channel/0029VbD5XgjEVccHF8XVcr3q" target="_blank" class="whatsapp-btn">
+                <i class="fab fa-whatsapp"></i> JOIN SALURAN WHATSAPP
+            </a>
+            <div class="developer-credit">DEV BY <span class="dev-name">LUTFIZX</span></div>
+        </div>
+
+    </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p class="loading-text">Generating...</p>
+    <p class="loading-sub" id="loadingSub">Memuat font...</p>
+</div>
+
+<div class="notification" id="notification">
+    <div class="notification-icon"><i class="fas fa-check-circle"></i></div>
+    <div class="notification-content">
+        <h3>Generate Selesai!</h3>
+        <p>Gambar siap diunduh 🔥</p>
+    </div>
+</div>
+
+<script>
+// ── CONFIG — sama persis dengan index.js ──────────────
+const CONFIG = {
+    canvas:   { width: 1920, height: 3416 },
+    username: {
+        a: 2650,       // y atas box
+        b: 2790,       // y bawah box
+        c: 727,        // x kiri box
+        d: 1319,       // x kanan box
+        centerX: 1009, // pusat horizontal
+        fontSize: 85,
+        maxChars: 20,
+    }
+}
+
+// Font TeutonNormal — load dari assets
+const FONT_URL = '/asset/fonts/TeutonNormal.otf'
+let fontLoaded = false
+
+// ── DOM ───────────────────────────────────────────────
+const lobbySelect    = document.getElementById('lobbySelect')
+const generateBtn    = document.getElementById('generateBtn')
+const loadingOverlay = document.getElementById('loadingOverlay')
+const loadingSub     = document.getElementById('loadingSub')
+const resultSection  = document.getElementById('resultSection')
+const downloadBtn    = document.getElementById('downloadBtn')
+const newBtn         = document.getElementById('newBtn')
+const usernameInput  = document.getElementById('username')
+const errorMessage   = document.getElementById('errorMessage')
+const errorText      = document.getElementById('errorText')
+const notification   = document.getElementById('notification')
+const resultCanvas   = document.getElementById('resultCanvas')
+
+// ── LOBBY SELECT ──────────────────────────────────────
+for (let i = 1; i <= 30; i++) {
+    const o = document.createElement('option')
+    o.value = i; o.textContent = `Lobby ${i}`
+    lobbySelect.appendChild(o)
+}
+
+// ── VALIDASI ──────────────────────────────────────────
+function checkInput() {
+    generateBtn.disabled = usernameInput.value.trim().length === 0
+}
+usernameInput.addEventListener('input', checkInput)
+checkInput()
+
+// ── LOAD FONT ─────────────────────────────────────────
+async function loadFont() {
+    if (fontLoaded) return
+    loadingSub.textContent = 'Memuat font TeutonNormal...'
+    const font = new FontFace('TeutonNormal', `url(${FONT_URL})`)
+    const loaded = await font.load()
+    document.fonts.add(loaded)
+    fontLoaded = true
+}
+
+// ── LOAD IMAGE ────────────────────────────────────────
+function loadImg(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload  = () => resolve(img)
+        img.onerror = () => reject(new Error('Gagal memuat gambar: ' + src))
+        img.src = src
+    })
+}
+
+// ── DRAW GRADIENT USERNAME — sama persis index.js ─────
+function drawGradientUsername(ctx, username, cfg) {
+    const { a, b, c, d, fontSize, maxChars, centerX } = cfg
+    const name = String(username || 'Player').slice(0, maxChars)
+    const boxW = d - c
+    const boxH = b - a
+    const cx   = centerX ?? (c + boxW / 2)
+
+    let size = fontSize
+    ctx.textAlign    = 'center'
+    ctx.textBaseline = 'middle'
+
+    // Kecilkan font sampai muat di dalam box
+    while (size > 12) {
+        ctx.font = `${size}px TeutonNormal`
+        if (ctx.measureText(name).width <= boxW) break
+        size -= 1
+    }
+
+    ctx.font = `${size}px TeutonNormal`
+    const centerY = a + boxH / 2
+    const textW   = ctx.measureText(name).width
+    const gradX1  = cx - textW / 2
+    const gradX2  = cx + textW / 2
+
+    // Gradient horizontal emas persis index.js
+    const grad = ctx.createLinearGradient(gradX1, centerY, gradX2, centerY)
+    grad.addColorStop(0.00, '#FFFDE7')
+    grad.addColorStop(0.35, '#FFE57F')
+    grad.addColorStop(0.70, '#FFB300')
+    grad.addColorStop(1.00, '#FF8F00')
+
+    ctx.save()
+    ctx.shadowColor   = 'rgba(0,0,0,0.7)'
+    ctx.shadowBlur    = 8
+    ctx.shadowOffsetX = 3
+    ctx.shadowOffsetY = 4
+    ctx.fillStyle = grad
+    ctx.fillText(name, cx, centerY)
+    ctx.restore()
+}
+
+// ── GENERATE ──────────────────────────────────────────
+async function generate() {
+    const username = usernameInput.value.trim()
+    let lobbyNum   = parseInt(lobbySelect.value)
+    if (!lobbyNum || lobbyNum < 1)
+        lobbyNum = Math.floor(Math.random() * 30) + 1
+
+    loadingOverlay.classList.add('active')
+    errorMessage.classList.remove('active')
+    generateBtn.disabled = true
+
+    try {
+        // 1. Load font
+        await loadFont()
+
+        // 2. Load gambar lobby
+        loadingSub.textContent = `Memuat lobby ${lobbyNum}...`
+        const lobbyImg = await loadImg(`/asset/lobby/${lobbyNum}.jpg`)
+
+        // 3. Render canvas 1920×3416
+        loadingSub.textContent = 'Menggambar nama...'
+        const { width, height } = CONFIG.canvas
+        resultCanvas.width  = width
+        resultCanvas.height = height
+
+        const ctx = resultCanvas.getContext('2d')
+
+        // Gambar lobby sebagai background
+        ctx.drawImage(lobbyImg, 0, 0, width, height)
+
+        // Tulis username dengan gradient emas
+        drawGradientUsername(ctx, username, CONFIG.username)
+
+        // 4. Tampilkan
+        loadingOverlay.classList.remove('active')
+        resultSection.classList.add('active')
+        showNotification()
+        resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+    } catch(err) {
+        loadingOverlay.classList.remove('active')
+        showError(err.message)
+        console.error(err)
+    } finally {
+        checkInput()
+    }
+}
+
+// ── UTILS ─────────────────────────────────────────────
+function showNotification() {
+    notification.classList.add('show')
+    setTimeout(() => notification.classList.remove('show'), 4000)
+}
+function showError(msg) {
+    errorText.textContent = msg
+    errorMessage.classList.add('active')
+    setTimeout(() => errorMessage.classList.remove('active'), 6000)
+}
+
+// ── EVENTS ────────────────────────────────────────────
+generateBtn.addEventListener('click', generate)
+
+downloadBtn.addEventListener('click', () => {
+    const url = resultCanvas.toDataURL('image/jpeg', 1.0)
+    const a   = document.createElement('a')
+    a.href     = url
+    a.download = `ff-lobby-${usernameInput.value.trim()}-${Date.now()}.jpg`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+})
+
+newBtn.addEventListener('click', () => {
+    resultSection.classList.remove('active')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+})
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && !loadingOverlay.classList.contains('active'))
+        generateBtn.click()
+})
+
+window.addEventListener('load', () => window.scrollTo(0, 0))
+</script>
+</body>
+</html>
