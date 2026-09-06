@@ -103,6 +103,11 @@
         <span id="errorText">Terjadi kesalahan.</span>
     </div>
 
+    <div class="error-message" id="fontWarning" style="background:#FFF8E6;border-color:#FFE8A3;color:#B26A00;">
+        <i class="fas fa-triangle-exclamation"></i>
+        <span>Font TeutonNormal gagal dimuat dari <code>/asset/fonts/TeutonNormal.otf</code>, pakai font fallback Arial. Cek apakah file ada di folder tersebut.</span>
+    </div>
+
     <div class="card">
         <div class="section-label"><i class="fas fa-user"></i> Username</div>
         <div class="field">
@@ -198,18 +203,27 @@ function checkInput() {
 usernameInput.addEventListener('input', checkInput)
 checkInput()
 
-// ── LOAD FONT (dengan fallback) ────────────────────────
+// ── LOAD FONT (dengan verifikasi jelas) ────────────────
+let fontStatus = null // null = belum dicoba, true = berhasil, false = gagal
+
 async function loadFont() {
-    if (fontLoaded) return
-    loadingSub.textContent = 'Memuat font...'
+    if (fontStatus !== null) return
+    loadingSub.textContent = 'Memuat font TeutonNormal...'
     try {
         const font = new FontFace('TeutonNormal', `url(${FONT_URL})`)
         const loaded = await font.load()
         document.fonts.add(loaded)
+
+        // Verifikasi font benar-benar terdaftar & bisa dipakai canvas
+        const ok = document.fonts.check(`85px TeutonNormal`)
+        if (!ok) throw new Error('Font termuat tapi gagal terdaftar di browser')
+
+        fontStatus = true
+        console.log('✅ Font TeutonNormal berhasil dimuat dari', FONT_URL)
     } catch(e) {
-        console.warn('Font TeutonNormal tidak ditemukan, pakai fallback.')
+        fontStatus = false
+        console.warn('❌ Font TeutonNormal GAGAL dimuat:', e.message, '— cek path:', FONT_URL)
     }
-    fontLoaded = true
 }
 
 // ── LOAD IMAGE ────────────────────────────────────────
@@ -273,10 +287,15 @@ async function generate() {
 
     loadingOverlay.classList.add('active')
     errorMessage.classList.remove('active')
+    document.getElementById('fontWarning').classList.remove('active')
     generateBtn.disabled = true
 
     try {
         await loadFont()
+
+        if (fontStatus === false) {
+            document.getElementById('fontWarning').classList.add('active')
+        }
 
         loadingSub.textContent = `Memuat lobby ${lobbyNum}...`
         const lobbyImg = await loadImg(`/asset/lobby/${lobbyNum}.jpg`)
